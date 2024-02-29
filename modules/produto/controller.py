@@ -1,16 +1,21 @@
 from flask import Blueprint, request, jsonify
+
+from modules.categoria.modelo import Categoria
+from modules.marca.controller import dao_marca
+from modules.marca.modelo import Marca
 from modules.produto.dao import DAOProduto
 from modules.produto.modelo import Produto
 from modules.produto.sql import SQLProduto
+from utils.serializer import serialize
 
 produto_controller = Blueprint('produto_controller', __name__)
-dao_produto = DAOProduto
+dao_produto = DAOProduto()
 module_name = 'produto'
 
 
 def get_produto():
     produtos = dao_produto.get_all()
-    results = [produto.__dict__ for produto in produtos]
+    results = [serialize(produto) for produto in produtos]
     response = jsonify(results)
     response.status_code = 200
     return response
@@ -22,15 +27,25 @@ def create_produto():
         if campo not in data.keys() or not data.get(campo, '').strip():
             erros.append(f"O campo {campo} é obrigatorio")
 
-    if not erros and dao_produto.get_produto_by_description(**data):
+    marca = categoria = None
+    try:
+        marca = Marca(id=data.pop('marca'))
+        categoria = Categoria(id=data.pop('categoria'))
+    except:
+        pass
+
+    if not erros and dao_produto.get_produtos_por_nome(**data):
         erros.append(f"Já existe um produto com essa descrição")
     if erros:
         response = jsonify(erros)
         response.status_code = 401
         return response
 
-    produto = Produto(**data)
-    dao_produto.salvar(produto)
+    produto = Produto(nome=data.get('nome'))
+    produto.marca = marca
+    produto.categoria = categoria
+
+    dao_produto.add(produto)
     response = jsonify('OK')
     response.status_code = 201
     return response
@@ -60,7 +75,7 @@ def get_update_delete_produto(id: int):
             return response
         for campo in dados:
             setattr(dados_existem, campo, dados[campo])
-            dao_produto.salvar(dados_existem)
+            dao_produto.add(dados_existem)
             response = jsonify('Produto atualizada com sucesso!')
             response.status_code = 200
             return response
@@ -75,36 +90,3 @@ def get_update_delete_produto(id: int):
         response = jsonify('Produto excluída com sucesso!')
         response.status_code = 200
         return response
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

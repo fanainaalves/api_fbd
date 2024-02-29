@@ -1,7 +1,7 @@
 class Categoria():
-    def __init__(self, descricao, id=None):
+    def __init__(self, descricao = None, id=None):
         self.id = id
         self.descricao = descricao
 
     def __str__(self):
-        return 'Categoria: {}'.format(self.descricao)
+        return f'[{self.id}] {self.descricao}'

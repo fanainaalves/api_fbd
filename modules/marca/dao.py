@@ -2,7 +2,6 @@ from modules.marca.modelo import Marca
 from modules.marca.sql import SQLMarca
 from service.connect import Connect
 
-
 class DAOMarca(SQLMarca):
     def __init__(self):
         self.connection = Connect().get_instance()
@@ -13,14 +12,14 @@ class DAOMarca(SQLMarca):
     def get_marca_by_cnpj(self, cnpj):
         query = self._SELECT_BY_CNPJ
         cursor = self.connection.cursor()
-        cursor.execute(query, (cnpj,))
+        cursor.execute(query, [cnpj])
         results = cursor.fetchall()
         cols = [desc[0] for desc in cursor.description]
         results = [dict(zip(cols, i)) for i in results]
         results = [Marca(**i) for i in results]
         return results
 
-    def salvar(self, marca: Marca):
+    def add(self, marca: Marca):
         if not isinstance(marca, Marca):
             raise Exception("Tipo inválido")
         query = self._INSERT_INTO
@@ -39,12 +38,21 @@ class DAOMarca(SQLMarca):
         results = [Marca(**i) for i in results]
         return results
 
-
     def deletar(self, marca: Marca):
         if not isinstance(marca, Marca):
             raise Exception("Tipo inválido")
         query = self._DELETE_BY_CNPJ
         cursor = self.connection.cursor()
-        cursor.execute(query, (marca.cnpj,))
+        cursor.execute(query, [marca.cnpj])
         self.connection.commit()
         return True
+
+    def get_by_cnpj(self, cnpj):
+        query = self._SELECT_BY_CNPJ
+        cursor = self.connection.cursor()
+        cursor.execute(query, [cnpj])
+        results = cursor.fetchall()
+        cols = [desc[0] for desc in cursor.description]
+        results = [dict(zip(cols, i)) for i in results]
+        results = [Marca(**i) for i in results]
+        return results

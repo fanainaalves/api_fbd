@@ -7,14 +7,12 @@ categoria_controller = Blueprint('categoria_controller', __name__)
 dao_categoria = DAOCategoria()
 module_name = 'categoria'
 
-
 def get_categorias():
     categorias = dao_categoria.get_all()
     results = [categoria.__dict__ for categoria in categorias]
     response = jsonify(results)
     response.status_code = 200
     return response
-
 
 def create_categoria():
     data = request.json
@@ -31,11 +29,10 @@ def create_categoria():
         return response
 
     categoria = Categoria(**data)
-    dao_categoria.salvar(categoria)
+    dao_categoria.add(categoria)
     response = jsonify('OK')
     response.status_code = 201
     return response
-
 
 @categoria_controller.route(f'/{module_name}/', methods=['GET', 'POST'])
 def get_or_create_categorias():
@@ -43,7 +40,6 @@ def get_or_create_categorias():
         return get_categorias()
     else:
         return create_categoria()
-
 
 @categoria_controller.route(f'/{module_name}/<id>/', methods=['GET', 'PUT', 'DELETE'])
 def get_update_delete_categoria(id: int):
@@ -63,7 +59,7 @@ def get_update_delete_categoria(id: int):
             return response
         for campo in dados:
             setattr(dados_existem, campo, dados[campo])
-            dao_categoria.salvar(dados_existem)
+            dao_categoria.add(dados_existem)
             response = jsonify('Categoria atualizada com sucesso!')
             response.status_code = 200
             return response

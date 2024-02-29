@@ -7,14 +7,12 @@ marca_controller = Blueprint('marca_controller', __name__)
 dao_marca = DAOMarca()
 module_name = 'marca'
 
-
 def get_marcas():
     marcas = dao_marca.get_all()
     results = [marca.__dict__ for marca in marcas]
     response = jsonify(results)
     response.status_code = 200
     return response
-
 
 def create_marca():
     data = request.json
@@ -35,11 +33,10 @@ def create_marca():
         return response
 
     marca = Marca(**data)
-    dao_marca.salvar(marca)
+    dao_marca.add(marca)
     response = jsonify('OK')
     response.status_code = 201
     return response
-
 
 @marca_controller.route('/marca/', methods=['GET', 'POST'])
 def get_or_create_marca():
@@ -47,7 +44,6 @@ def get_or_create_marca():
         return get_marcas()
     else:
         return create_marca()
-
 
 @marca_controller.route(f'/{module_name}/<cnpj>/', methods=['GET', 'PUT', 'DELETE'])
 def get_marca_update_delete_categoria(cnpj: int):
@@ -67,7 +63,7 @@ def get_marca_update_delete_categoria(cnpj: int):
             return response
         for campo in dados:
             setattr(dados_existem, campo, dados[campo])
-            dao_marca.salvar(dados_existem)
+            dao_marca.add(dados_existem)
             response = jsonify('Marca atualizada com sucesso!')
             response.status_code = 200
             return response
@@ -82,17 +78,3 @@ def get_marca_update_delete_categoria(cnpj: int):
         response = jsonify('Marca excluída com sucesso!')
         response.status_code = 200
         return response
-
-
-
-
-
-
-
-
-
-
-
-
-
-
